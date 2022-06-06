@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Game</title>
+
+    <style>
+        body{
+            background: black;
+            display: flex;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas{
+            border: 2px solid white;
+        }
+        
+    </style>
+</head>
+<body>
+    <canvas id="mycanvas" width="300" height="300"></canvas>
+    <script>
+        var canvas = document.getElementById('mycanvas');
+        var context = canvas.getContext('2d');
+        const GRID = 10;
+        var MIN = 1;
+        var MAX = 29;
+        var gameover = false;
+        var size = 2;
+        var x = new Array(900);
+        var y = new Array(900);
+
+        for(var z=0; z<=size; z++){
+            x[z]= 40-z*10;
+            y[z]= 40;
+        }
+        var moveleft = false;
+        var moveright = true;
+        var moveup = false;
+        var movedown = false;
+
+        var ate_apple = true;
+        var x_apple;
+        var y_apple;
+
+        
+        function gameOver(){
+            context.fillStyle = 'white';
+            context.textBaseline = 'middle';
+            context.textAlign = 'center';
+            context.font = "30px monoscope";
+            context.fillText('Game Over!', canvas.width/2, canvas.height/2);
+        }
+
+        function placeApple(){
+            var r = Math.floor(Math.random() * (MAX-MIN) + MIN);
+            x_apple = r*GRID;
+            r = Math.floor(Math.random() * (MAX-MIN) + MIN);
+            y_apple = r*GRID;
+        }
+
+        function display(){
+            context.clearRect(0,0,canvas.width, canvas.height);
+            if(gameover)
+            {
+                gameOver();
+
+            }else{
+                if(ate_apple){
+                    placeApple();
+                    ate_apple = false;
+                }
+
+                context.beginPath();
+                        context.fillStyle = "blue";
+                        context.arc(x_apple, y_apple, GRID/2, 0, 2*Math.PI, false);
+                        context.fill();
+                        context.closePath();
+
+
+                for(var z = 0; z <= size; z++){
+                    if(z==0){
+                        context.beginPath();
+                        context.fillStyle = "Green";
+                        context.arc(x[z], y[z], GRID/2, 0, 2*Math.PI, false);
+                        context.fill();
+                        context.closePath();
+                    }
+                    else{
+                        context.beginPath();
+                        context.fillStyle = "white";
+                        context.arc(x[z], y[z], GRID/2 ,0, 2*Math.PI, false);
+                        context.fill();
+                        context.closePath();
+                    }
+                }
+            }
+        
+        }
+
+        onkeydown = function(e)
+        {
+            var key = e.keyCode;
+            if((key == 37) && (!moveright))//move left
+            {
+                moveleft = true;
+                moveup = false;
+                movedown = false;
+            }
+            if((key == 39) && (!moveleft))//move right
+            {
+                moveright = true;
+                moveup = false;
+                movedown = false;
+            }
+            if((key == 38) && (!movedown))//move up
+            {
+                moveleft = false;
+                moveup = true;
+                moveright = false;
+            }
+            if((key == 40) && (!moveup))//move down
+            {
+                moveright = false;
+                moveleft = false;
+                movedown = true;
+            }
+        }
+         function move(){
+             for(var z= size; z>0; z--)
+             {
+                 x[z] = x[(z-1)];
+                 y[z] = y[(z-1)];
+             }
+             if(moveleft){
+                 x[0] = x[0] - GRID;
+             }
+             if(moveright){
+                 x[0] = x[0] + GRID;
+             }
+             if(moveup){
+                 y[0] = y[0] - GRID;
+             }
+             if(movedown){
+                 y[0] = y[0] + GRID;
+             }
+         }
+
+         function validatemove(){
+             for(var z = size; z>0; z--){
+                 if((z>4) && (x[0] == x[z]) && (y[0] == y[z]))
+                 {
+                     gameover = true;
+                 }
+             }
+             if(y[0] >= canvas.height){
+                 gameover = true;
+             }
+             if(y[0] < 0){
+                 gameover = true;
+             }
+             if(x[0] >= canvas.width){
+                 gameover = true;
+             }
+             if(x[0] < 0){
+                 gameover = true;
+             }
+         }
+
+        function eatApple(){
+            if ((x[0] == x_apple) && (y[0] == y_apple))
+            {
+                size++;
+                ate_apple = true;
+            
+            }
+        }
+
+
+        function cyclic(){
+            eatApple();
+            validatemove();
+            move();
+            display();
+            setTimeout("cyclic()", 150);
+        }
+
+        cyclic();
+    </script>
+
+</body>
+</html>
